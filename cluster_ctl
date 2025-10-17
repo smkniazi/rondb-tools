@@ -412,6 +412,9 @@ def generate_config_files():
                     "UseHopsworksAPIKeys": False,
                 },
             },
+            "Internal": {
+              "EnablePPROF": True,
+            },
         }
         if get_config('rdrs_major_version') == 1:
             # rdrs 1 does not support more than one data connection. Also, it

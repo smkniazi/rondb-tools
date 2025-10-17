@@ -1,6 +1,31 @@
 import random
 import json
+import logging
+from datetime import datetime
 from locust import HttpUser, task, between, events
+
+# Setup failure logging
+failure_logger = logging.getLogger('locust_failures')
+failure_logger.setLevel(logging.INFO)
+failure_handler = logging.FileHandler('locust_failures.log')
+failure_handler.setFormatter(logging.Formatter('%(message)s'))
+failure_logger.addHandler(failure_handler)
+
+@events.request.add_listener
+def log_request_failure(request_type, name, response_time, response_length, response, context, exception, **kwargs):
+    if exception:
+        timestamp = datetime.now().isoformat()
+        failure_logger.info(f"\n{'='*80}")
+        failure_logger.info(f"FAILURE at {timestamp}")
+        failure_logger.info(f"Request: {request_type} {name}")
+        failure_logger.info(f"Exception: {exception}")
+        failure_logger.info(f"Response time: {response_time}ms")
+        if response:
+            failure_logger.info(f"Status code: {response.status_code}")
+            failure_logger.info(f"Response body: {response.text[:500]}")  # First 500 chars
+        if hasattr(context, 'request_meta') and context.request_meta.get('data'):
+            failure_logger.info(f"Request payload: {context.request_meta['data'][:500]}")  # First 500 chars
+        failure_logger.info(f"{'='*80}\n")
 
 class BatchReadUser(HttpUser):
 
