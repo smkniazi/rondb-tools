@@ -881,6 +881,19 @@ def do_populate(columns, rows, column_types):
     ])
     check_failed()
 
+# populate_feature_store command
+def do_populate_feature_store():
+    # Validate mysqld node exists
+    first('mysqld') # Assert that one exists
+    print("Importing feature_store.sql into the database...")
+    print("This may take a while as the file is 7MB...")
+    # Import the SQL dump
+    run_for_one_node(first('mysqld'), lambda node: [
+        ssh(node, f"bash ~/scripts/populate_feature_store.sh")
+    ])
+    check_failed()
+    print("Feature store database imported successfully.")
+
 # start_locust command
 def do_start_locust(rows, total_workers, only_validate=False):
     # Validate parameters
@@ -1056,6 +1069,9 @@ def main():
             "  ./cluster_ctl stop_locust",
             "    Stop locust. Called by start_locust (and hence bench_locust).",
             "",
+            "  ./cluster_ctl populate_feature_store",
+            "    Import the feature_store.sql database dump into the cluster.",
+            "",
             "  ./cluster_ctl list",
             "    List node information.",
             "",
@@ -1088,6 +1104,7 @@ def main():
     elif action in ["terraform",
                     "kill_tmux",
                     "stop_locust",
+                    "populate_feature_store",
                     "list",
                     "cleanup"]:
         if argc != 2:
@@ -1095,12 +1112,13 @@ def main():
         if action == "terraform": do_terraform()
         elif action == "kill_tmux": do_kill_tmux()
         elif action == "stop_locust": do_stop_locust()
+        elif action == "populate_feature_store": do_populate_feature_store()
         elif action == "list": do_list()
         elif action == "cleanup": do_cleanup()
         else: die("Bug")
     elif action in ["bench_locust", "populate", "start_locust"]:
         columns = 10
-        rows = 100000
+        rows = 1000
         column_types = "INT"
         total_workers = None
         i = 2

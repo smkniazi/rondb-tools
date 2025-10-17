@@ -4,8 +4,8 @@ from locust import HttpUser, task, between, events
 
 class BatchReadUser(HttpUser):
 
-    table_size = 100000
-    batch_size = 100
+    table_size = 1000
+    batch_size = 128
 
     @events.init_command_line_parser.add_listener
     def _(parser):
@@ -22,18 +22,44 @@ class BatchReadUser(HttpUser):
 
     @task
     def batch_read(self):
-        operations = []
+        entries = []
         for _ in range(self.batch_size):
-            id0 = random.randint(1, self.table_size)
-            operations.append({
-                "method": "POST",
-                "relative-url": f"{BatchReadUser.db_name}/bench_tbl/pk-read",
-                "body": {
-                    "filters": [{"column": "id0", "value": id0}]
-                }
+            id1 = random.randint(1, self.table_size)
+            entries.append({
+                "id1": id1
             })
 
-        payload = {"operations": operations}
+        payload = {
+            "featureStoreName": "fsdb002",
+            "featureViewName": "sample_2",
+            "featureViewVersion": 1,
+            "passedFeatures": [],
+            "entries": entries,
+            "metadataOptions": None,
+            "options": None
+        }
         headers = {"Content-Type": "application/json"}
 
-        self.client.post("/0.1.0/batch", data=json.dumps(payload), headers=headers)
+        self.client.post("/0.1.0/batch_feature_store", data=json.dumps(payload), headers=headers)
+
+    @task
+    def complex_type_read(self):
+        id_value = str(random.randint(1, self.table_size))
+
+        payload = {
+            "featureStoreName": "fsdb002",
+            "featureViewName": "sample_complex_type_512",
+            "featureViewVersion": 1,
+            "passedFeatures": {},
+            "entries": {
+                "id": id_value
+            },
+            "metadataOptions": {
+                "featureName": True,
+                "featureType": True
+            },
+            "options": None
+        }
+        headers = {"Content-Type": "application/json"}
+
+        self.client.post("/0.1.0/feature_store", data=json.dumps(payload), headers=headers)

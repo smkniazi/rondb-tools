@@ -76,7 +76,7 @@ aws_config = {
     "deployment_type": "aws",
 
     # AWS region
-    "region": "eu-north-1",
+    "region": "us-east-2",
 
     # The number of availability zones to use.
     # Numbers larger than 1 means multi-AZ environment and 1 means single-AZ.
@@ -87,8 +87,8 @@ aws_config = {
     #**cluster_size_medium,
 
     # Node type configs.
-    **arm_config_aws,
-    #**x86_config_aws,
+    #**arm_config_aws,
+    **x86_config_aws,
 
     # Disk sizes
     **disk_sizes_aws,
@@ -128,8 +128,8 @@ static_config = {
 
 config = {
     # RonDB version
-    **latest_rondb,
-    #**latest_rondb_22,
+    #**latest_rondb,
+    **latest_rondb_22,
 
     # All other configuration, either AWS or static
     **aws_config

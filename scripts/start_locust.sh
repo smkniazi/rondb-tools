@@ -16,7 +16,7 @@ if [ ${NODEINFO_IDX} -eq 0 ]; then
   (set -x
    with-restarts locust \
    taskset -c 0 locust -f ./scripts/locust_batch_read.py --host=${RDRS_URI} \
-           --batch-size=100 --table-size=$LOCUST_TABLE_SIZE \
+           --batch-size=128 --table-size=$LOCUST_TABLE_SIZE \
            --database-name=benchmark --master \
            > ${RUN_DIR}/locust_master.log 2>&1 &)
   sleep 2
